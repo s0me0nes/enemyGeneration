@@ -1,27 +1,35 @@
+using System.Collections;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Spawner : MonoBehaviour
 {
-    private Spawner _spawner;
-    private bool _isRightMoving;
-    private float _speed = 2;
-
+    [SerializeField] private Transform[] _points;
+    [SerializeField] private Enemy _enemy;
+    
     private void Start()
     {
-        Destroy(gameObject, 7f);
-        _spawner = FindObjectOfType<Spawner>();
-        _isRightMoving = _spawner.IsDirection();
+        var createdEnemy = StartCoroutine(SpawnEnemy());
     }
 
-    void Update()
+    public bool GetRandomDirection()
     {
-        if (_isRightMoving)
+        int maxRandomValue = 10;
+        int halfOfMaxRandomValue = 5;
+        int random = Random.Range(0, maxRandomValue);
+
+        return random < halfOfMaxRandomValue;
+    }
+
+    private IEnumerator SpawnEnemy()
+    {
+        var waitSeconds = new WaitForSeconds(2);
+
+        while (true)
         {
-            transform.Translate(_speed * Time.deltaTime, 0, 0);
-        }
-        else if (_isRightMoving == false)
-        {
-            transform.Translate(-_speed * Time.deltaTime, 0, 0);
+            Transform randomPoint = _points[Random.Range(0, _points.Length)];
+            var enemy = Instantiate(_enemy, new Vector2(randomPoint.position.x, randomPoint.position.y), Quaternion.identity);
+            enemy.Init(GetRandomDirection());
+            yield return waitSeconds;
         }
     }
 }
